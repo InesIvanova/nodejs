@@ -5,6 +5,7 @@ const database = require('../config/database');
 const qs = require('querystring');
 const multiparty = require('multiparty');
 const shortid = require('shortid'); 
+const formidable = require('formidable'); 
 
 module.exports = (req, res) => {
     let request = url.parse(req.url).pathname;
@@ -23,54 +24,36 @@ module.exports = (req, res) => {
        });
     } 
     else if (request === '/product/add' && req.method === 'POST') {
-        let form = new multiparty.Form();
         let product = {};
-
-        form.on('part', (part) => {
-            if (part.fillename) {
-                let dataStr = '';
-
-                part.setEncoding('binary');
-                part.on('data', (data) => {
-                    dataStr += data;
-                });
-                part.on('end', () => {
-                    let fileName = shortid.generate();
-                    let filePath = path.normalize(path.join(__dirname, `../content/views/images/${fileName}`));
-
-                    product.image = filePath;
-                    console.log(filePath);
-                    fs.writeFile(`${filePath}`, dataStr, 
-                    {encoding: 'ascii'}, (err) => {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                    })
-                })
-
-            } else {
-                part.setEncoding('utf-8');
-                let field = '';
-                part.on('data', (data) => {
-                    field += data;
-                });
-                part.on('end', () => {
-                    product[part.name] = field
-                })
-            }
+        let dataStr = '';
+        req.on('data', (data) => {
+            dataStr += data;
+            console.log('formata? ', data)
         })
+        var form = new formidable.IncomingForm();
+        form.parse(req, function (err, fields, files) {
+        product = fields;
+            
+        var oldpath = files.image.path;
+        var newpath = path.normalize(path.join(__dirname, '../content/images/')) + files.image.name;
+        var relativePath = 'http://localhost:8080/content/images/' + files.image.name;
+        product.image = relativePath
+        console.log('product', product);
 
-        form.on('close', () => {
-            database.addProduct(product);
-            res.writeHead(302, {
-                Location: '/'
-            })
-            res.end();
+        fs.rename(oldpath, newpath, function (err) {
+        if (err) throw err;
+        database.addProduct(product);
+        res.writeHead(302, {
+            Location: '/'
+        });
+        res.end();
+        
+      });
 
-        })
-        form.parse(req);
-        return
+      
+    });
+
+   
     } else {
         return true;
     }

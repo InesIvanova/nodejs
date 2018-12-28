@@ -9,6 +9,7 @@
   "author": "Ine",
   "license": "ISC",
   "dependencies": {
+    "formidable": "^1.2.1",
     "multiparty": "^4.2.1",
     "shortid": "^2.2.14"
   }
