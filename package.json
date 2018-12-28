@@ -1,0 +1,15 @@
+{
+  "name": "shop_stop",
+  "version": "1.0.0",
+  "description": "mynodeproject",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ine",
+  "license": "ISC",
+  "dependencies": {
+    "multiparty": "^4.2.1",
+    "shortid": "^2.2.14"
+  }
+}
